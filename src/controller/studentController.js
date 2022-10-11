@@ -5,6 +5,11 @@ const moment = require('moment')
 exports.addStudent = async (req, res, next) => {
 
     try {
+
+        if (!req.body.username && !req.body.password) {
+            res.status(400).json({ status: 'Failure', message: 'Missing input parameter', data: null }); return
+        }
+
         let params = {};
         params.username = req.body.username
         const checkExistance = await studentService.checkExistance(params)
@@ -16,6 +21,10 @@ exports.addStudent = async (req, res, next) => {
         let expiredTime = moment(createdTime).add(60, 'days')
         let expiredInMilli = new Date(moment(expiredTime).format())
 
+        let getID = await studentService.generateId()
+        let id = getID.length == 0 ? 1 : getID[0].userId + 1
+
+        params.userId = id
         params.password = req.body.password
         params.createdDate = moment().format('L')
         params.createdAt = createdTime
@@ -47,6 +56,28 @@ exports.checkExistanceById = async (req, res, next) => {
 
 }
 
+exports.login = async (req, res, next) => {
+    try {
+        
+        if (!req.body.username && !req.body.password) {
+            res.status(400).json({ status: 'Failure', message: 'Missing input parameter', data: null }); return
+        }
+
+        let params = { username: req.body.username, password: req.body.password }
+        let result = await studentService.login(params)
+        console.log(result)
+        if (result) {
+            res.status(200).json({ status: 'Success', message: 'User login successfully', data: result })
+        }
+        else {
+            res.status(400).json({ status: 'Failure', message: 'Invalid username or password', data: null })
+        }
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ status: 'Failure', message: 'Internal Server Error', data: null })
+    }
+}
+
 exports.listStudents = async (req, res, next) => {
 
     try {
@@ -67,3 +98,5 @@ exports.listStudents = async (req, res, next) => {
     }
 
 }
+
+

@@ -29,9 +29,27 @@ module.exports = {
         }
     },
 
+    login: async (params) => {
+        try {
+            const result = await studentdbService.login(params)
+            return result
+        } catch (error) {
+            return error
+        }
+    },
+
     listStudents: async (params) => {
         try {
             const result = await studentdbService.listStudents(params)
+            return result
+        } catch (error) {
+            return error
+        }
+    },
+    
+    generateId: async () => {
+        try {
+            const result = await studentdbService.generateId()
             return result
         } catch (error) {
             return error

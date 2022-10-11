@@ -13,7 +13,6 @@ module.exports = {
 
     async checkExistanceById(params) {
         try {
-            console.log(params)
             const result = await studentSchema.findOne(params)
             return result;
         } catch (error) {
@@ -31,6 +30,15 @@ module.exports = {
         }
     },
 
+    async login(params) {
+        try {
+            const result = await studentSchema.findOne(params)
+            return result
+        } catch (error) {
+            return error
+        }
+    },
+
     async deleteStudents() {
         try {
             const result = await studentSchema.deleteMany({ "expiredAt": { $lte: Date.now() } })
@@ -40,10 +48,17 @@ module.exports = {
         }
     },
 
+    async generateId() {
+        try {
+            const result = await studentSchema.find({}).sort({userId: -1}).limit(1)
+            return result
+        } catch (error) {
+            return error
+        }
+    },
+
     async listStudents(params) {
         try {
-            console.log("supplychain_db_service/SupplyChainList - start");
-
             let query = [];
 
             const allowedFilterArr = ["username", "createdAt", "expiredAt", "createdDate", "expiredDate"];
@@ -97,7 +112,7 @@ module.exports = {
                 });
             } else {
                 query.push({
-                    $sort: { "username": 1 }
+                    $sort: { "createdAt": -1 }
                 });
             }
 
@@ -108,7 +123,9 @@ module.exports = {
                     results: {
                         $push: {
                             "_id": "$_id",
+                            "userId": "$userId",
                             "username": "$username",
+                            "password": "$password",
                             "createdAt": "$createdAt",
                             "expiredAt": "$expiredAt"
                         }
@@ -136,7 +153,6 @@ module.exports = {
             }
             console.log(`query :  ${JSON.stringify(query)}`);
             const result = await studentSchema.aggregate(query);
-            console.log(result);
             return Promise.resolve(result);
         } catch (err) {
             console.logr(err);
